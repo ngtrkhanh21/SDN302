@@ -1,5 +1,5 @@
-import axiosClient from '../api/axios-client';
-import ENDPOINTS from '../api/endpoints';
+import axiosClient from "../api/axios-client";
+import ENDPOINTS from "../api/endpoints";
 
 async function getAllUsers() {
   const response = await axiosClient.get(ENDPOINTS.USER_ALL);
@@ -12,13 +12,23 @@ async function getUserById(id) {
 }
 
 async function getMe() {
-  const response = await axiosClient.post(ENDPOINTS.USER_ME);
-  return response.data;
+  try {
+    const response = await axiosClient.get(ENDPOINTS.USER_ME);
+    return response.data;
+  } catch (_error) {
+    const response = await axiosClient.post(ENDPOINTS.USER_ME);
+    return response.data;
+  }
 }
 
 async function updateMe(payload) {
-  const response = await axiosClient.post(ENDPOINTS.USER_UPDATE_ME, payload);
-  return response.data;
+  try {
+    const response = await axiosClient.put(ENDPOINTS.USER_UPDATE_ME, payload);
+    return response.data;
+  } catch (_error) {
+    const response = await axiosClient.post(ENDPOINTS.USER_UPDATE_ME, payload);
+    return response.data;
+  }
 }
 
 const userService = {

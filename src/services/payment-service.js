@@ -1,14 +1,11 @@
-import axiosClient from '../api/axios-client';
-import ENDPOINTS from '../api/endpoints';
+import axiosClient from "../api/axios-client";
+import ENDPOINTS from "../api/endpoints";
 
-async function createPaymentFromOrder(orderId, paymentMethod = 'vnpay') {
-  const response = await axiosClient.post(
-    ENDPOINTS.PAYMENT_CREATE_FROM_ORDER,
-    {
-      order_id: orderId,
-      paymentMethod,
-    },
-  );
+async function createPaymentFromOrder(orderId, paymentMethod = "vnpay") {
+  const response = await axiosClient.post(ENDPOINTS.PAYMENT_CREATE_FROM_ORDER, {
+    order_id: orderId,
+    paymentMethod,
+  });
   return response.data;
 }
 
@@ -25,11 +22,33 @@ async function getPaymentDetail(paymentId) {
 }
 
 async function updatePaymentStatus(paymentId, payload) {
-  const response = await axiosClient.put(
-    ENDPOINTS.PAYMENT_UPDATE_STATUS(paymentId),
-    payload,
-  );
-  return response.data;
+  try {
+    const response = await axiosClient.put(
+      ENDPOINTS.PAYMENT_UPDATE_STATUS(paymentId),
+      payload,
+    );
+    return response.data;
+  } catch (putError) {
+    const status = putError?.response?.status;
+
+    if (status === 404 || status === 405 || status === 501) {
+      try {
+        const response = await axiosClient.patch(
+          ENDPOINTS.PAYMENT_UPDATE_STATUS(paymentId),
+          payload,
+        );
+        return response.data;
+      } catch (_patchError) {
+        const response = await axiosClient.post(
+          ENDPOINTS.PAYMENT_UPDATE_STATUS(paymentId),
+          payload,
+        );
+        return response.data;
+      }
+    }
+
+    throw putError;
+  }
 }
 
 const paymentService = {

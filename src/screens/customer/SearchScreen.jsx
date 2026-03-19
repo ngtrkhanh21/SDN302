@@ -1,205 +1,275 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  ActivityIndicator,
-  TouchableOpacity,
-  ScrollView,
-} from 'react-native';
-import courseService from '../../services/course-service';
-import categoryService from '../../services/category-service';
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+} from "react-native";
+import instructorService from "../../services/instructor-service";
+import useAuthStore from "../../store/auth-store";
 
 export default function SearchScreen({ navigation }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [courses, setCourses] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-  const [search, setSearch] = useState('');
+  const { user } = useAuthStore();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({
+    fullName: user?.name || "",
+    email: user?.email || "",
+    phoneNumber: user?.phoneNumber || user?.phone || "",
+    qualificationsText: "",
+    jobTitle: "",
+    profilePicUrl: user?.avatar || user?.profilePicUrl || "",
+    note: "",
+  });
 
-  const loadData = async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      fullName: user?.name || user?.fullName || "",
+      email: user?.email || "",
+    }));
+  }, [user?.name, user?.fullName, user?.email]);
+
+  const setField = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const qualifications = useMemo(
+    () =>
+      form.qualificationsText
+        .split(/[\n,]/)
+        .map((item) => item.trim())
+        .filter(Boolean),
+    [form.qualificationsText],
+  );
+
+  const validate = () => {
+    if (!form.fullName.trim()) {
+      return "Tài khoản chưa có họ và tên. Vui lòng cập nhật hồ sơ trước.";
+    }
+    if (!form.email.trim()) {
+      return "Tài khoản chưa có email. Vui lòng cập nhật hồ sơ trước.";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+      return "Email không đúng định dạng.";
+    }
+    if (!form.phoneNumber.trim()) {
+      return "Vui lòng nhập số điện thoại.";
+    }
+    if (!qualifications.length) {
+      return "Vui lòng nhập ít nhất 1 chứng chỉ.";
+    }
+    if (!form.jobTitle.trim()) {
+      return "Vui lòng nhập chức danh công việc.";
+    }
+    return "";
+  };
+
+  const handleSubmit = async () => {
+    const validationError = validate();
+    if (validationError) {
+      Alert.alert("Thiếu thông tin", validationError);
+      return;
+    }
+
+    const payload = {
+      fullName: form.fullName.trim(),
+      email: form.email.trim(),
+      phoneNumber: form.phoneNumber.trim(),
+      qualifications,
+      jobTitle: form.jobTitle.trim(),
+      profilePicUrl: form.profilePicUrl.trim(),
+      note: form.note.trim(),
+    };
+
+    setIsSubmitting(true);
     try {
-      const [courseData, catData] = await Promise.all([
-        courseService.getCourses(),
-        categoryService.getCategories(),
-      ]);
-      const courseList = courseData?.data || courseData || [];
-      const catList = catData?.data || catData || [];
-      setCourses(Array.isArray(courseList) ? courseList : []);
-      setCategories(Array.isArray(catList) ? catList : []);
+      await instructorService.becomeInstructor(payload);
+      Alert.alert(
+        "Gửi thành công",
+        "Yêu cầu trở thành giảng viên đã được gửi. Vui lòng chờ xét duyệt.",
+      );
+      setForm((prev) => ({
+        ...prev,
+        qualificationsText: "",
+        jobTitle: "",
+        note: "",
+      }));
+      navigation.navigate("Home");
     } catch (error) {
-      console.warn('Failed to load search data', error);
+      console.warn("Failed to submit become-instructor request", error);
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        "Không thể gửi yêu cầu lúc này.";
+      Alert.alert("Lỗi", message);
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const filtered = courses.filter(course => {
-    const name = (course.name || course.title || '').toLowerCase();
-    const cat = (course.category?.name || '').toLowerCase();
-    const matchSearch =
-      !search ||
-      name.includes(search.toLowerCase()) ||
-      cat.includes(search.toLowerCase());
-    const courseCatId = course.category?._id || course.category_id;
-    const matchCat = !selectedCategory || courseCatId === selectedCategory;
-    return matchSearch && matchCat;
-  });
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() =>
-        navigation.navigate('CourseDetail', { courseId: item._id || item.id })
-      }
-    >
-      <Text style={styles.cardTitle}>{item.name || 'Unnamed course'}</Text>
-      <Text style={styles.cardMeta}>
-        {item.category?.name || item.category_id || 'Art for kids'}
-      </Text>
-      <Text style={styles.cardPrice}>
-        {item.price != null ? `${item.price} VND` : 'Free'}
-      </Text>
-    </TouchableOpacity>
-  );
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Search courses</Text>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.content}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={styles.title}>Đăng ký trở thành giảng viên</Text>
+      <Text style={styles.subtitle}>
+        Gửi thông tin để đội ngũ kiểm duyệt xét duyệt hồ sơ của bạn.
+      </Text>
 
+      <Text style={styles.label}>Họ và tên</Text>
       <TextInput
-        style={styles.search}
-        placeholder="Type course name or category..."
-        placeholderTextColor="#999"
-        value={search}
-        onChangeText={setSearch}
+        style={[styles.input, styles.readOnlyInput]}
+        value={form.fullName}
+        editable={false}
+        selectTextOnFocus={false}
+        placeholder="Họ và tên từ tài khoản"
+        placeholderTextColor="#7f8c8d"
       />
 
-      {/* Category filter chips */}
-      {categories.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={{ marginTop: 8 }}
-          contentContainerStyle={{ paddingVertical: 4, alignItems: 'center' }}
-        >
-          <TouchableOpacity
-            style={[styles.chip, !selectedCategory && styles.chipActive]}
-            onPress={() => setSelectedCategory(null)}
-          >
-            <Text style={[styles.chipText, !selectedCategory && styles.chipTextActive]}>
-              All
-            </Text>
-          </TouchableOpacity>
-          {categories.map(cat => {
-            const cid = cat._id || cat.id;
-            const active = selectedCategory === cid;
-            return (
-              <TouchableOpacity
-                key={String(cid)}
-                style={[styles.chip, active && styles.chipActive]}
-                onPress={() => setSelectedCategory(active ? null : cid)}
-              >
-                <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                  {cat.name || 'Category'}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      )}
+      <Text style={styles.label}>Email</Text>
+      <TextInput
+        style={[styles.input, styles.readOnlyInput]}
+        value={form.email}
+        editable={false}
+        selectTextOnFocus={false}
+        placeholder="Email từ tài khoản"
+        placeholderTextColor="#7f8c8d"
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
-      {isLoading ? (
-        <ActivityIndicator style={{ marginTop: 24 }} color="#6c5ce7" />
-      ) : (
-        <FlatList
-          data={filtered}
-          keyExtractor={item => String(item._id || item.id)}
-          renderItem={renderItem}
-          contentContainerStyle={{ paddingVertical: 8 }}
-          ListEmptyComponent={
-            <Text style={styles.empty}>No courses found.</Text>
-          }
-        />
-      )}
-    </View>
+      <Text style={styles.label}>Số điện thoại</Text>
+      <TextInput
+        style={styles.input}
+        value={form.phoneNumber}
+        onChangeText={(value) => setField("phoneNumber", value)}
+        placeholder="Nhập số điện thoại"
+        placeholderTextColor="#7f8c8d"
+        keyboardType="phone-pad"
+      />
+
+      <Text style={styles.label}>Chứng chỉ</Text>
+      <TextInput
+        style={[styles.input, styles.multilineInput]}
+        value={form.qualificationsText}
+        onChangeText={(value) => setField("qualificationsText", value)}
+        placeholder="Nhập chứng chỉ, ngăn cách bằng dấu phẩy hoặc xuống dòng"
+        placeholderTextColor="#7f8c8d"
+        multiline
+      />
+
+      <Text style={styles.label}>Chức danh công việc</Text>
+      <TextInput
+        style={styles.input}
+        value={form.jobTitle}
+        onChangeText={(value) => setField("jobTitle", value)}
+        placeholder="Ví dụ: Art Teacher"
+        placeholderTextColor="#7f8c8d"
+      />
+
+      <Text style={styles.label}>Ảnh (URL)</Text>
+      <TextInput
+        style={styles.input}
+        value={form.profilePicUrl}
+        onChangeText={(value) => setField("profilePicUrl", value)}
+        placeholder="https://..."
+        placeholderTextColor="#7f8c8d"
+        autoCapitalize="none"
+      />
+
+      <Text style={styles.label}>Ghi chú</Text>
+      <TextInput
+        style={[styles.input, styles.multilineInput]}
+        value={form.note}
+        onChangeText={(value) => setField("note", value)}
+        placeholder="Giới thiệu ngắn về kinh nghiệm giảng dạy của bạn"
+        placeholderTextColor="#7f8c8d"
+        multiline
+      />
+
+      <TouchableOpacity
+        style={[
+          styles.submitButton,
+          isSubmitting && styles.submitButtonDisabled,
+        ]}
+        onPress={handleSubmit}
+        disabled={isSubmitting}
+      >
+        {isSubmitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitText}>Gửi yêu cầu</Text>
+        )}
+      </TouchableOpacity>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#a29bfe',
+    backgroundColor: "#f6f8fb",
+  },
+  content: {
     padding: 16,
     paddingTop: 48,
+    paddingBottom: 32,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#fff',
-    marginBottom: 12,
+    fontSize: 25,
+    fontWeight: "800",
+    color: "#0f172a",
+    marginBottom: 8,
   },
-  search: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 16,
+  subtitle: {
+    fontSize: 14,
+    color: "#475569",
+    marginBottom: 18,
+    lineHeight: 20,
   },
-  chip: {
-    backgroundColor: '#fff',
+  label: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1e293b",
+    marginBottom: 6,
+    marginTop: 10,
+  },
+  input: {
+    backgroundColor: "#fff",
     borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginRight: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
-  },
-  chipActive: {
-    backgroundColor: '#6c5ce7',
-    borderColor: '#6c5ce7',
-  },
-  chipText: {
-    fontSize: 11,
-    color: '#6c5ce7',
-    fontWeight: '600',
-  },
-  chipTextActive: {
-    color: '#fff',
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 16,
-    marginTop: 12,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#2d3436',
-  },
-  cardMeta: {
-    fontSize: 13,
-    color: '#636e72',
-    marginTop: 4,
-  },
-  cardPrice: {
+    borderColor: "#dbe4ee",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#d63031',
-    marginTop: 6,
+    color: "#111827",
   },
-  empty: {
-    textAlign: 'center',
-    color: '#dfe6e9',
-    marginTop: 24,
+  multilineInput: {
+    minHeight: 92,
+    textAlignVertical: "top",
+  },
+  readOnlyInput: {
+    backgroundColor: "#eef2f7",
+    color: "#334155",
+  },
+  submitButton: {
+    marginTop: 22,
+    backgroundColor: "#2563eb",
+    borderRadius: 12,
+    alignItems: "center",
+    paddingVertical: 13,
+  },
+  submitButtonDisabled: {
+    opacity: 0.65,
+  },
+  submitText: {
+    color: "#fff",
     fontSize: 15,
+    fontWeight: "800",
   },
 });

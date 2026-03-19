@@ -1,61 +1,94 @@
-import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import InstructorProfilesScreen from '../screens/staff/InstructorProfilesScreen';
-import AccountManageScreen from '../screens/staff/AccountManageScreen';
-import PostManageScreen from '../screens/staff/PostManageScreen';
-import ProfileScreen from '../screens/shared/ProfileScreen';
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
+import React from "react";
+import ProfileEditScreen from "../screens/customer/ProfileEditScreen";
+import ProfileScreen from "../screens/shared/ProfileScreen";
+import InstructorDetailScreen from "../screens/staff/InstructorDetailScreen";
+import InstructorEditScreen from "../screens/staff/InstructorEditScreen";
+import InstructorProfilesScreen from "../screens/staff/InstructorProfilesScreen";
+import StaffCourseManagementScreen from "../screens/staff/StaffCourseManagementScreen";
+import StaffInstructorApprovalScreen from "../screens/staff/StaffInstructorApprovalScreen";
+import StaffContentStack from "./StaffContentStack";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-export default function StaffStack() {
+function StaffTabs() {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: true,
-        tabBarActiveTintColor: '#00cec9',
-        tabBarInactiveTintColor: '#666',
+        tabBarActiveTintColor: "#3498db",
+        tabBarInactiveTintColor: "#95a5a6",
         tabBarStyle: {
-          backgroundColor: '#fff',
+          backgroundColor: "#fff",
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
           height: 70,
+          paddingBottom: 8,
         },
         tabBarIcon: ({ color, size }) => {
-          let iconName = 'people';
+          let iconName = "book-multiple";
 
-          if (route.name === 'Instructors') {
-            iconName = 'school';
-          } else if (route.name === 'Accounts') {
-            iconName = 'people-circle';
-          } else if (route.name === 'Posts') {
-            iconName = 'newspaper';
-          } else if (route.name === 'Profile') {
-            iconName = 'person-circle';
+          if (route.name === "Courses") {
+            iconName = "book-open-page-variant";
+          } else if (route.name === "Content") {
+            iconName = "file-document-multiple";
+          } else if (route.name === "InstructorApproval") {
+            iconName = "clipboard-check";
+          } else if (route.name === "Instructors") {
+            iconName = "school";
+          } else if (route.name === "Profile") {
+            iconName = "account-circle";
           }
 
-          return <Ionicons name={iconName} size={size} color={color} />;
+          return (
+            <MaterialCommunityIcons name={iconName} size={size} color={color} />
+          );
         },
       })}
     >
       <Tab.Screen
+        name="Courses"
+        component={StaffCourseManagementScreen}
+        options={{ title: "Khóa học" }}
+      />
+      <Tab.Screen
+        name="Content"
+        component={StaffContentStack}
+        options={{ title: "Nội dung" }}
+      />
+      <Tab.Screen
+        name="InstructorApproval"
+        component={StaffInstructorApprovalScreen}
+        options={{ title: "Duyệt GV" }}
+      />
+      <Tab.Screen
         name="Instructors"
         component={InstructorProfilesScreen}
-        options={{ title: 'Instructors' }}
+        options={{ title: "Giảng viên" }}
       />
       <Tab.Screen
-        name="Accounts"
-        component={AccountManageScreen}
-        options={{ title: 'Accounts' }}
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: "Tài khoản" }}
       />
-      <Tab.Screen
-        name="Posts"
-        component={PostManageScreen}
-        options={{ title: 'Posts' }}
-      />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }
 
+export default function StaffStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="StaffTabs" component={StaffTabs} />
+      <Stack.Screen
+        name="InstructorDetail"
+        component={InstructorDetailScreen}
+      />
+      <Stack.Screen name="InstructorEdit" component={InstructorEditScreen} />
+      <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} />
+    </Stack.Navigator>
+  );
+}

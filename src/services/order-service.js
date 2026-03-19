@@ -1,11 +1,10 @@
-import axiosClient from '../api/axios-client';
-import ENDPOINTS from '../api/endpoints';
+import axiosClient from "../api/axios-client";
+import ENDPOINTS from "../api/endpoints";
 
 async function createOrderFromCart(selectedCartItemIds) {
-  const response = await axiosClient.post(
-    ENDPOINTS.ORDER_CREATE_FROM_CART,
-    { selectedCartItemIds },
-  );
+  const response = await axiosClient.post(ENDPOINTS.ORDER_CREATE_FROM_CART, {
+    selectedCartItemIds,
+  });
   return response.data;
 }
 
@@ -25,10 +24,30 @@ async function getOrderDetail(orderId) {
 }
 
 async function updateOrderStatus(orderId, newStatus) {
-  const response = await axiosClient.put(
-    ENDPOINTS.ORDER_UPDATE_STATUS(orderId, newStatus),
-  );
-  return response.data;
+  try {
+    const response = await axiosClient.put(
+      ENDPOINTS.ORDER_UPDATE_STATUS(orderId, newStatus),
+    );
+    return response.data;
+  } catch (putError) {
+    const status = putError?.response?.status;
+
+    if (status === 404 || status === 405 || status === 501) {
+      try {
+        const response = await axiosClient.patch(
+          ENDPOINTS.ORDER_UPDATE_STATUS(orderId, newStatus),
+        );
+        return response.data;
+      } catch (_patchError) {
+        const response = await axiosClient.post(
+          ENDPOINTS.ORDER_UPDATE_STATUS(orderId, newStatus),
+        );
+        return response.data;
+      }
+    }
+
+    throw putError;
+  }
 }
 
 const orderService = {
