@@ -7,7 +7,6 @@ import ProfileScreen from "../screens/shared/ProfileScreen";
 import InstructorDetailScreen from "../screens/staff/InstructorDetailScreen";
 import InstructorEditScreen from "../screens/staff/InstructorEditScreen";
 import InstructorProfilesScreen from "../screens/staff/InstructorProfilesScreen";
-import StaffCourseManagementScreen from "../screens/staff/StaffCourseManagementScreen";
 import StaffInstructorApprovalScreen from "../screens/staff/StaffInstructorApprovalScreen";
 import StaffContentStack from "./StaffContentStack";
 
@@ -32,9 +31,7 @@ function StaffTabs() {
         tabBarIcon: ({ color, size }) => {
           let iconName = "book-multiple";
 
-          if (route.name === "Courses") {
-            iconName = "book-open-page-variant";
-          } else if (route.name === "Content") {
+          if (route.name === "Content") {
             iconName = "file-document-multiple";
           } else if (route.name === "InstructorApproval") {
             iconName = "clipboard-check";
@@ -51,14 +48,9 @@ function StaffTabs() {
       })}
     >
       <Tab.Screen
-        name="Courses"
-        component={StaffCourseManagementScreen}
-        options={{ title: "Khóa học" }}
-      />
-      <Tab.Screen
         name="Content"
         component={StaffContentStack}
-        options={{ title: "Nội dung" }}
+        options={{ title: "Bài viết" }}
       />
       <Tab.Screen
         name="InstructorApproval"
