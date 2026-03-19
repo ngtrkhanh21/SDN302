@@ -12,6 +12,7 @@ import {
     View,
 } from "react-native";
 import instructorService from "../../services/instructor-service";
+import userService from "../../services/user-service";
 
 function extractEntity(payload) {
   if (payload?.data && !Array.isArray(payload.data)) {
@@ -22,7 +23,51 @@ function extractEntity(payload) {
 }
 
 function isValidImage(url) {
-  return typeof url === "string" && url.startsWith("http");
+  return (
+    typeof url === "string" &&
+    /^(https?:\/\/|file:\/\/|content:\/\/|data:image\/)/i.test(url.trim())
+  );
+}
+
+function normalizeImageUrl(url) {
+  if (typeof url !== "string") {
+    return "";
+  }
+
+  const trimmed = url.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  if (trimmed.startsWith("//")) {
+    return `https:${trimmed}`;
+  }
+
+  return trimmed;
+}
+
+function pickAvatarUrl(detail, user) {
+  const candidates = [
+    detail?.profilePicUrl,
+    detail?.profilePicURL,
+    detail?.profilePic,
+    detail?.avatar,
+    detail?.user?.profilePicUrl,
+    detail?.user?.avatar,
+    user?.profilePicUrl,
+    user?.profilePicURL,
+    user?.profilePic,
+    user?.avatar,
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = normalizeImageUrl(candidate);
+    if (isValidImage(normalized)) {
+      return normalized;
+    }
+  }
+
+  return "";
 }
 
 function toCurrency(value) {
@@ -36,6 +81,7 @@ export default function InstructorDetailScreen({ route, navigation }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [userInfo, setUserInfo] = useState(null);
 
   const qualificationText = useMemo(() => {
     if (
@@ -61,6 +107,18 @@ export default function InstructorDetailScreen({ route, navigation }) {
         await instructorService.getInstructorDetail(instructorId);
       const entity = extractEntity(response) || null;
       setDetail(entity);
+
+      if (entity?.user_id) {
+        try {
+          const userResponse = await userService.getUserById(entity.user_id);
+          setUserInfo(extractEntity(userResponse) || null);
+        } catch (userError) {
+          console.warn("Failed to load related user profile", userError);
+          setUserInfo(null);
+        }
+      } else {
+        setUserInfo(null);
+      }
     } catch (error) {
       console.warn("Failed to load instructor detail", error);
       const message =
@@ -119,7 +177,9 @@ export default function InstructorDetailScreen({ route, navigation }) {
     );
   }
 
-  const avatarUrl = detail?.profilePicUrl;
+  const avatarUrl = pickAvatarUrl(detail, userInfo);
+  const displayName = detail?.fullName || userInfo?.name || "Không xác định";
+  const displayEmail = detail?.email || userInfo?.email || "Không xác định";
 
   return (
     <View style={styles.container}>
@@ -143,12 +203,8 @@ export default function InstructorDetailScreen({ route, navigation }) {
             </View>
           )}
 
-          <Text style={styles.profileName}>
-            {detail?.fullName || "Không xác định"}
-          </Text>
-          <Text style={styles.profileEmail}>
-            {detail?.email || "Không xác định"}
-          </Text>
+          <Text style={styles.profileName}>{displayName}</Text>
+          <Text style={styles.profileEmail}>{displayEmail}</Text>
         </View>
 
         <View style={styles.infoCard}>
