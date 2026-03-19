@@ -2,15 +2,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Image,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import postService from "../../services/post-service";
 import userService from "../../services/user-service";
@@ -228,7 +228,7 @@ export default function StaffContentManagementScreen({ navigation }) {
     <View style={styles.container}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Quản lí Nội dung</Text>
+          <Text style={styles.headerTitle}>Quản lí bài viết</Text>
           <Text style={styles.headerSubtitle}>
             Quản lý bài viết trong hệ thống
           </Text>
