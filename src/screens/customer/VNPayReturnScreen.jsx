@@ -430,7 +430,7 @@ export default function VNPayReturnScreen({ route, navigation }) {
           </Text>
           <Text style={styles.subtitle}>
             {isSuccess
-              ? 'Cảm ơn bạn đã mua khóa học. Vào "My Courses" để bắt đầu học!'
+              ? 'Cảm ơn bạn đã mua khóa học. Vào "Khóa học của tôi" để bắt đầu học!'
               : "Giao dịch chưa hoàn tất hoặc đã bị hủy. Vui lòng thử lại."}
           </Text>
 
@@ -445,7 +445,7 @@ export default function VNPayReturnScreen({ route, navigation }) {
             }
           >
             <Text style={styles.buttonText}>
-              {isSuccess ? "Vào My Courses" : "Xem đơn hàng"}
+              {isSuccess ? "Vào khóa học của tôi" : "Xem đơn hàng"}
             </Text>
           </TouchableOpacity>
         </ScrollView>

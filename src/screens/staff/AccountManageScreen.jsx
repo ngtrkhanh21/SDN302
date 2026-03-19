@@ -1,12 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, View } from "react-native";
 
 export default function AccountManageScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Accounts management</Text>
+      <Text style={styles.title}>Quản lý tài khoản</Text>
       <Text style={styles.subtitle}>
-        Keep all little artists and teachers safe.
+        Quản lý thông tin học viên và giảng viên an toàn.
       </Text>
     </View>
   );
@@ -15,21 +14,20 @@ export default function AccountManageScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#a29bfe',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#a29bfe",
+    alignItems: "center",
+    justifyContent: "center",
     padding: 24,
   },
   title: {
     fontSize: 24,
-    fontWeight: '800',
-    color: '#6c5ce7',
+    fontWeight: "800",
+    color: "#6c5ce7",
     marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,
-    color: '#dfe6e9',
-    textAlign: 'center',
+    color: "#dfe6e9",
+    textAlign: "center",
   },
 });
-

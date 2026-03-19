@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  RefreshControl,
-} from 'react-native';
-import instructorService from '../../services/instructor-service';
+    ActivityIndicator,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import instructorService from "../../services/instructor-service";
 
 export default function DashboardScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -27,7 +27,7 @@ export default function DashboardScreen() {
       setSalesSummary(Array.isArray(sales) ? sales : []);
       setOrders(Array.isArray(ordersList) ? ordersList : []);
     } catch (error) {
-      console.warn('Dashboard load error', error);
+      console.warn("Dashboard load error", error);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -58,11 +58,15 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Instructor Dashboard</Text>
-      <Text style={styles.subtitle}>Overview of your art classes</Text>
+      <Text style={styles.title}>Bảng điều khiển giảng viên</Text>
+      <Text style={styles.subtitle}>Tổng quan về các lớp học của bạn</Text>
 
       {isLoading ? (
-        <ActivityIndicator color="#6c5ce7" size="large" style={{ marginTop: 24 }} />
+        <ActivityIndicator
+          color="#6c5ce7"
+          size="large"
+          style={{ marginTop: 24 }}
+        />
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -71,29 +75,33 @@ export default function DashboardScreen() {
           }
         >
           <View style={styles.statsContainer}>
-            <View style={[styles.statCard, { backgroundColor: '#a29bfe' }]}>
-              <Text style={styles.statLabel}>Total Revenue</Text>
+            <View style={[styles.statCard, { backgroundColor: "#a29bfe" }]}>
+              <Text style={styles.statLabel}>Tổng doanh thu</Text>
               <Text style={styles.statValue}>
-                {Number(totalRevenue).toLocaleString('vi-VN')} đ
+                {Number(totalRevenue).toLocaleString("vi-VN")} đ
               </Text>
             </View>
 
             <View style={styles.statRow}>
-              <View style={[styles.statCardHalf, { backgroundColor: '#74b9ff' }]}>
-                <Text style={styles.statLabel}>Courses Sold</Text>
+              <View
+                style={[styles.statCardHalf, { backgroundColor: "#74b9ff" }]}
+              >
+                <Text style={styles.statLabel}>Khóa học đã bán</Text>
                 <Text style={styles.statValue}>{totalCoursesSold}</Text>
               </View>
-              <View style={[styles.statCardHalf, { backgroundColor: '#55efc4' }]}>
-                <Text style={styles.statLabel}>Total Orders</Text>
+              <View
+                style={[styles.statCardHalf, { backgroundColor: "#55efc4" }]}
+              >
+                <Text style={styles.statLabel}>Tổng đơn hàng</Text>
                 <Text style={styles.statValue}>{totalOrders}</Text>
               </View>
             </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Top Performing Courses</Text>
+            <Text style={styles.sectionTitle}>Khóa học nổi bật</Text>
             {salesSummary.length === 0 ? (
-              <Text style={styles.emptyText}>No sales data yet.</Text>
+              <Text style={styles.emptyText}>Chưa có dữ liệu bán hàng.</Text>
             ) : (
               salesSummary
                 .sort((a, b) => (b.totalRevenue || 0) - (a.totalRevenue || 0))
@@ -101,10 +109,10 @@ export default function DashboardScreen() {
                 .map((item, index) => (
                   <View key={index} style={styles.courseRow}>
                     <Text style={styles.courseName} numberOfLines={1}>
-                      {item.courseName || `Course ID: ${item.courseId}`}
+                      {item.courseName || `Mã khóa học: ${item.courseId}`}
                     </Text>
                     <Text style={styles.courseRevenue}>
-                      {Number(item.totalRevenue || 0).toLocaleString('vi-VN')} đ
+                      {Number(item.totalRevenue || 0).toLocaleString("vi-VN")} đ
                     </Text>
                   </View>
                 ))
@@ -119,19 +127,19 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     padding: 24,
     paddingTop: 56,
   },
   title: {
     fontSize: 26,
-    fontWeight: '800',
-    color: '#2d3436',
+    fontWeight: "800",
+    color: "#2d3436",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 15,
-    color: '#636e72',
+    color: "#636e72",
     marginBottom: 24,
   },
   statsContainer: {
@@ -141,53 +149,53 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 24,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
   statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   statCardHalf: {
     flex: 1,
     borderRadius: 20,
     padding: 20,
     marginHorizontal: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
   statLabel: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     opacity: 0.9,
   },
   statValue: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: '800',
+    fontWeight: "800",
     marginTop: 8,
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2d3436',
+    fontWeight: "700",
+    color: "#2d3436",
     marginBottom: 12,
   },
   courseRow: {
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    justifyContent: "space-between",
     padding: 16,
     borderRadius: 16,
     marginBottom: 8,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 5,
     elevation: 2,
@@ -195,17 +203,17 @@ const styles = StyleSheet.create({
   courseName: {
     flex: 1,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#2d3436',
+    fontWeight: "600",
+    color: "#2d3436",
     paddingRight: 16,
   },
   courseRevenue: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#00b894',
+    fontWeight: "700",
+    color: "#00b894",
   },
   emptyText: {
-    color: '#b2bec3',
-    fontStyle: 'italic',
+    color: "#b2bec3",
+    fontStyle: "italic",
   },
 });

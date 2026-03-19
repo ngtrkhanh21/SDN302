@@ -53,11 +53,11 @@ export default function PaymentHistoryScreen({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backText}>← Back</Text>
+        <Text style={styles.backText}>← Quay lại</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Payment History</Text>
-      <Text style={styles.subtitle}>All your transactions</Text>
+      <Text style={styles.title}>Lịch sử thanh toán</Text>
+      <Text style={styles.subtitle}>Tất cả giao dịch của bạn</Text>
 
       {isLoading ? (
         <ActivityIndicator
@@ -66,7 +66,7 @@ export default function PaymentHistoryScreen({ navigation }) {
           size="large"
         />
       ) : payments.length === 0 ? (
-        <Text style={styles.empty}>No payments yet.</Text>
+        <Text style={styles.empty}>Chưa có giao dịch nào.</Text>
       ) : (
         payments.map((item) => {
           const pid = item._id || item.id;

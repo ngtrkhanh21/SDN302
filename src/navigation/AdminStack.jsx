@@ -44,24 +44,28 @@ function AdminTabs() {
       <Tab.Screen
         name="AdminHome"
         component={AdminDashboardScreen}
-        options={{ title: "Dashboard" }}
+        options={{ title: "Bảng điều khiển" }}
       />
       <Tab.Screen
         name="ManageAccounts"
         component={GlobalAccountManageScreen}
-        options={{ title: "Accounts" }}
+        options={{ title: "Tài khoản" }}
       />
       <Tab.Screen
         name="ApproveCourses"
         component={CourseApproveScreen}
-        options={{ title: "Courses" }}
+        options={{ title: "Khóa học" }}
       />
       <Tab.Screen
         name="AdminPosts"
         component={AdminPostManageScreen}
-        options={{ title: "Posts" }}
+        options={{ title: "Bài viết" }}
       />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: "Tài khoản" }}
+      />
     </Tab.Navigator>
   );
 }

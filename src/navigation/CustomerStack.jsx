@@ -45,20 +45,36 @@ function CustomerTabs() {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{ tabBarLabel: "Trang chủ" }}
+      />
       <Tab.Screen
         name="Search"
         component={SearchScreen}
-        options={{ tabBarLabel: "Become Instructor" }}
+        options={{ tabBarLabel: "Trở thành giảng viên" }}
       />
       <Tab.Screen
         name="MyCourses"
         component={MyCoursesScreen}
-        options={{ tabBarLabel: "My Courses" }}
+        options={{ tabBarLabel: "Khóa học của tôi" }}
       />
-      <Tab.Screen name="Cart" component={CartScreen} />
-      <Tab.Screen name="Orders" component={OrderHistoryScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ tabBarLabel: "Giỏ hàng" }}
+      />
+      <Tab.Screen
+        name="Orders"
+        component={OrderHistoryScreen}
+        options={{ tabBarLabel: "Đơn hàng" }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarLabel: "Tài khoản" }}
+      />
     </Tab.Navigator>
   );
 }

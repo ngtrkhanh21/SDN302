@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
-import reportService from '../../services/report-service';
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import reportService from "../../services/report-service";
 
 export default function AdminDashboardScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,7 +15,7 @@ export default function AdminDashboardScreen() {
         const overview = await reportService.getAdminOverview();
         setStats(overview);
       } catch (error) {
-        console.warn('Failed to load admin overview', error);
+        console.warn("Failed to load admin overview", error);
       } finally {
         setIsLoading(false);
       }
@@ -26,19 +26,23 @@ export default function AdminDashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin dashboard</Text>
-      <Text style={styles.subtitle}>Overview of the art world</Text>
+      <Text style={styles.title}>Bảng điều khiển quản trị</Text>
+      <Text style={styles.subtitle}>Tổng quan hệ thống</Text>
 
       {isLoading ? (
-        <ActivityIndicator color="#fff" size="large" style={{ marginTop: 24 }} />
+        <ActivityIndicator
+          color="#fff"
+          size="large"
+          style={{ marginTop: 24 }}
+        />
       ) : (
         <View style={styles.cardRow}>
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Total courses</Text>
+            <Text style={styles.cardLabel}>Tổng khóa học</Text>
             <Text style={styles.cardValue}>{stats.totalCourses}</Text>
           </View>
           <View style={styles.card}>
-            <Text style={styles.cardLabel}>Total orders</Text>
+            <Text style={styles.cardLabel}>Tổng đơn hàng</Text>
             <Text style={styles.cardValue}>{stats.totalOrders}</Text>
           </View>
         </View>
@@ -50,41 +54,40 @@ export default function AdminDashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ff7675',
+    backgroundColor: "#ff7675",
     padding: 24,
     paddingTop: 56,
   },
   title: {
     fontSize: 28,
-    fontWeight: '800',
-    color: '#fff',
+    fontWeight: "800",
+    color: "#fff",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#ffeaa7',
+    color: "#ffeaa7",
     marginBottom: 24,
   },
   cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   card: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 20,
     padding: 16,
     marginRight: 12,
   },
   cardLabel: {
     fontSize: 14,
-    color: '#636e72',
+    color: "#636e72",
   },
   cardValue: {
     fontSize: 24,
-    fontWeight: '800',
-    color: '#d63031',
+    fontWeight: "800",
+    color: "#d63031",
     marginTop: 8,
   },
 });
-

@@ -168,7 +168,7 @@ export default function SearchScreen({ navigation }) {
         style={styles.input}
         value={form.jobTitle}
         onChangeText={(value) => setField("jobTitle", value)}
-        placeholder="Ví dụ: Art Teacher"
+        placeholder="Ví dụ: Giáo viên mỹ thuật"
         placeholderTextColor="#7f8c8d"
       />
 

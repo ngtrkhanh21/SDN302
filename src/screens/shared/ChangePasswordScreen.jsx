@@ -1,24 +1,24 @@
 // src/screens/shared/ChangePasswordScreen.jsx
-import React, { useState } from 'react';
+import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
-import authService from '../../services/auth-service';
+    Alert,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import authService from "../../services/auth-service";
 
 export default function ChangePasswordScreen({ navigation }) {
-  const [oldPassword, setOldPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirm, setConfirm] = useState('');
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = async () => {
     if (!oldPassword || !newPassword || !confirm) {
-      Alert.alert('Missing', 'Please fill all fields.');
+      Alert.alert("Thiếu thông tin", "Vui lòng điền đầy đủ các trường.");
       return;
     }
     setIsSubmitting(true);
@@ -28,12 +28,12 @@ export default function ChangePasswordScreen({ navigation }) {
         new_password: newPassword,
         confirm_new_password: confirm,
       });
-      Alert.alert('Updated', 'Password changed.', [
-        { text: 'OK', onPress: () => navigation.goBack() },
+      Alert.alert("Thành công", "Đổi mật khẩu thành công.", [
+        { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (e) {
-      console.warn('change-password failed', e);
-      Alert.alert('Error', 'Cannot change password.');
+      console.warn("change-password failed", e);
+      Alert.alert("Lỗi", "Không thể đổi mật khẩu.");
     } finally {
       setIsSubmitting(false);
     }
@@ -41,32 +41,29 @@ export default function ChangePasswordScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.back}
-        onPress={() => navigation.goBack()}
-      >
-        <Text style={styles.backText}>← Back</Text>
+      <TouchableOpacity style={styles.back} onPress={() => navigation.goBack()}>
+        <Text style={styles.backText}>← Quay lại</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Change password</Text>
+      <Text style={styles.title}>Đổi mật khẩu</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Old password"
+        placeholder="Mật khẩu hiện tại"
         secureTextEntry
         value={oldPassword}
         onChangeText={setOldPassword}
       />
       <TextInput
         style={styles.input}
-        placeholder="New password"
+        placeholder="Mật khẩu mới"
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
       />
       <TextInput
         style={styles.input}
-        placeholder="Confirm new password"
+        placeholder="Xác nhận mật khẩu mới"
         secureTextEntry
         value={confirm}
         onChangeText={setConfirm}
@@ -78,7 +75,7 @@ export default function ChangePasswordScreen({ navigation }) {
         disabled={isSubmitting}
       >
         <Text style={styles.buttonText}>
-          {isSubmitting ? 'Updating...' : 'Update password'}
+          {isSubmitting ? "Đang cập nhật..." : "Cập nhật mật khẩu"}
         </Text>
       </TouchableOpacity>
     </View>
@@ -86,12 +83,17 @@ export default function ChangePasswordScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#74b9ff', padding: 24, paddingTop: 48 },
+  container: {
+    flex: 1,
+    backgroundColor: "#74b9ff",
+    padding: 24,
+    paddingTop: 48,
+  },
   back: { marginBottom: 8 },
-  backText: { fontSize: 18, fontWeight: '700', color: '#dfe6e9' },
-  title: { fontSize: 22, fontWeight: '800', color: '#fff', marginBottom: 16 },
+  backText: { fontSize: 18, fontWeight: "700", color: "#dfe6e9" },
+  title: { fontSize: 22, fontWeight: "800", color: "#fff", marginBottom: 16 },
   input: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -99,12 +101,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    backgroundColor: '#fd79a8',
+    backgroundColor: "#fd79a8",
     borderRadius: 20,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 8,
   },
   buttonDisabled: { opacity: 0.7 },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  buttonText: { color: "#fff", fontSize: 18, fontWeight: "700" },
 });

@@ -66,7 +66,7 @@ export default function InstructorEditScreen({ route, navigation }) {
 
   const loadInstructorDetail = useCallback(async () => {
     if (!instructorId) {
-      Alert.alert("Error", "Thiếu instructorId.");
+      Alert.alert("Lỗi", "Thiếu instructorId.");
       navigation.goBack();
       return;
     }
