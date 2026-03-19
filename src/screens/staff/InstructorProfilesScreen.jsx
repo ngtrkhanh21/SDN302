@@ -82,7 +82,10 @@ function formatDate(value) {
 }
 
 function isValidImage(url) {
-  return typeof url === "string" && url.startsWith("http");
+  return (
+    typeof url === "string" &&
+    /^(https?:\/\/|file:\/\/|content:\/\/|data:image\/)/i.test(url.trim())
+  );
 }
 
 function InfoRow({ icon, label, value }) {
