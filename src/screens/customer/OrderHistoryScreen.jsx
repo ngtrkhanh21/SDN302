@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import orderService from '../../services/order-service';
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import orderService from "../../services/order-service";
 
 export default function OrderHistoryScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,37 +21,40 @@ export default function OrderHistoryScreen({ navigation }) {
       const list = data?.data || data || [];
       setOrders(Array.isArray(list) ? list : []);
     } catch (error) {
-      console.warn('Failed to load orders', error);
-      Alert.alert('Error', 'Cannot load orders.');
+      console.warn("Failed to load orders", error);
+      Alert.alert("Error", "Cannot load orders.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const unsub = navigation.addListener('focus', loadOrders);
+    const unsub = navigation.addListener("focus", loadOrders);
     return unsub;
   }, [navigation]);
 
-  const getStatusColor = status => {
-    if (status === 'paid') return '#00b894';
-    if (status === 'failed' || status === 'refunded') return '#d63031';
-    return '#fdcb6e';
+  const getStatusColor = (status) => {
+    if (status === "fail" || status === "Fail" || status === "Failed")
+      return "#d63031";
+    if (status === "cancelled" || status === "canceled") return "#d63031";
+    if (status === "paid") return "#00b894";
+    if (status === "failed" || status === "refunded") return "#d63031";
+    return "#fdcb6e";
   };
 
-  const handlePayNow = orderId => {
-    navigation.navigate('Payment', { orderId });
+  const handlePayNow = (orderId) => {
+    navigation.navigate("Payment", { orderId });
   };
 
   const renderItem = ({ item }) => {
     const orderId = item._id || item.id;
-    const status = item.status || 'pending';
+    const status = item.status || "pending";
     const items = item.items || item.courses || [];
     const total = item.total ?? items.reduce((s, i) => s + (i.price || 0), 0);
     const createdAt = item.createdAt
-      ? new Date(item.createdAt).toLocaleDateString('vi-VN')
-      : '';
-    const isPending = status === 'pending' || status === 'unpaid';
+      ? new Date(item.createdAt).toLocaleDateString("vi-VN")
+      : "";
+    const isPending = status === "pending" || status === "unpaid";
 
     return (
       <View style={styles.card}>
@@ -61,12 +64,14 @@ export default function OrderHistoryScreen({ navigation }) {
             {status.toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.total}>{Number(total).toLocaleString('vi-VN')} VND</Text>
+        <Text style={styles.total}>
+          {Number(total).toLocaleString("vi-VN")} VND
+        </Text>
         {createdAt ? <Text style={styles.date}>{createdAt}</Text> : null}
 
         <View style={styles.cardActions}>
           {/* Feedback for paid orders */}
-          {status === 'paid' && items.length > 0 && (
+          {status === "paid" && items.length > 0 && (
             <TouchableOpacity
               style={styles.feedbackBtn}
               onPress={() => {
@@ -75,7 +80,7 @@ export default function OrderHistoryScreen({ navigation }) {
                   items[0]?.course?._id ||
                   items[0]?.course?.id;
                 if (firstCourseId) {
-                  navigation.navigate('Feedback', { courseId: firstCourseId });
+                  navigation.navigate("Feedback", { courseId: firstCourseId });
                 }
               }}
             >
@@ -107,12 +112,10 @@ export default function OrderHistoryScreen({ navigation }) {
       ) : (
         <FlatList
           data={orders}
-          keyExtractor={item => String(item._id || item.id)}
+          keyExtractor={(item) => String(item._id || item.id)}
           renderItem={renderItem}
           contentContainerStyle={{ paddingVertical: 16 }}
-          ListEmptyComponent={
-            <Text style={styles.empty}>No orders yet.</Text>
-          }
+          ListEmptyComponent={<Text style={styles.empty}>No orders yet.</Text>}
         />
       )}
     </View>
@@ -122,52 +125,52 @@ export default function OrderHistoryScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fdcb6e',
+    backgroundColor: "#fdcb6e",
     padding: 16,
     paddingTop: 48,
   },
-  title: { fontSize: 24, fontWeight: '800', color: '#d35400', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#2d3436', marginBottom: 16 },
+  title: { fontSize: 24, fontWeight: "800", color: "#d35400", marginBottom: 4 },
+  subtitle: { fontSize: 14, color: "#2d3436", marginBottom: 16 },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 16,
     marginTop: 10,
   },
   cardRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  orderId: { fontSize: 16, fontWeight: '700', color: '#2d3436' },
-  status: { fontSize: 14, fontWeight: '600' },
-  total: { fontSize: 15, color: '#636e72', marginTop: 4 },
-  date: { fontSize: 12, color: '#b2bec3', marginTop: 2 },
+  orderId: { fontSize: 16, fontWeight: "700", color: "#2d3436" },
+  status: { fontSize: 14, fontWeight: "600" },
+  total: { fontSize: 15, color: "#636e72", marginTop: 4 },
+  date: { fontSize: 12, color: "#b2bec3", marginTop: 2 },
   cardActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
     gap: 8,
   },
   feedbackBtn: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#74b9ff',
+    borderColor: "#74b9ff",
     borderRadius: 10,
     paddingVertical: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  feedbackText: { color: '#0984e3', fontWeight: '600', fontSize: 13 },
+  feedbackText: { color: "#0984e3", fontWeight: "600", fontSize: 13 },
   payNowBtn: {
     flex: 1,
-    backgroundColor: '#e17055',
+    backgroundColor: "#e17055",
     borderRadius: 10,
     paddingVertical: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
-  payNowText: { color: '#fff', fontWeight: '700', fontSize: 13 },
+  payNowText: { color: "#fff", fontWeight: "700", fontSize: 13 },
   empty: {
-    textAlign: 'center',
-    color: '#2d3436',
+    textAlign: "center",
+    color: "#2d3436",
     marginTop: 24,
   },
 });
