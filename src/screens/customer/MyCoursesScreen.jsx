@@ -1,15 +1,15 @@
 // src/screens/customer/MyCoursesScreen.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import courseService from '../../services/course-service';
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import courseService from "../../services/course-service";
 
 export default function MyCoursesScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -22,15 +22,15 @@ export default function MyCoursesScreen({ navigation }) {
       const list = data?.data || data || [];
       setCourses(Array.isArray(list) ? list : []);
     } catch (e) {
-      console.warn('getMyCourses failed', e);
-      Alert.alert('Error', 'Cannot load your courses.');
+      console.warn("getMyCourses failed", e);
+      Alert.alert("Lỗi", "Không thể tải danh sách khóa học của bạn.");
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    const unsub = navigation.addListener('focus', load);
+    const unsub = navigation.addListener("focus", load);
     return unsub;
   }, [navigation]);
 
@@ -38,24 +38,26 @@ export default function MyCoursesScreen({ navigation }) {
     <TouchableOpacity
       style={styles.card}
       onPress={() =>
-        navigation.navigate('CoursePlayer', {
+        navigation.navigate("CoursePlayer", {
           courseId: item._id || item.id,
-          courseName: item.name || 'Course',
+          courseName: item.name || "Khóa học",
         })
       }
     >
       <View style={styles.cardContent}>
         <View style={{ flex: 1 }}>
-          <Text style={styles.title}>{item.name || 'Unnamed course'}</Text>
-          <Text style={styles.meta}>Tap to continue learning ▶</Text>
+          <Text style={styles.title}>
+            {item.name || "Khóa học chưa đặt tên"}
+          </Text>
+          <Text style={styles.meta}>Chạm để tiếp tục học ▶</Text>
         </View>
         <TouchableOpacity
           style={styles.reviewBtn}
           onPress={() =>
-            navigation.navigate('Feedback', { courseId: item._id || item.id })
+            navigation.navigate("Feedback", { courseId: item._id || item.id })
           }
         >
-          <Text style={styles.reviewBtnText}>Rate</Text>
+          <Text style={styles.reviewBtnText}>Đánh giá</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -63,18 +65,18 @@ export default function MyCoursesScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>My courses</Text>
+      <Text style={styles.header}>Khóa học của tôi</Text>
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 24 }} color="#e17055" />
       ) : (
         <FlatList
           data={courses}
-          keyExtractor={item => String(item._id || item.id)}
+          keyExtractor={(item) => String(item._id || item.id)}
           renderItem={renderItem}
           contentContainerStyle={{ paddingVertical: 16 }}
           ListEmptyComponent={
             <Text style={styles.empty}>
-              You haven't bought any courses yet.{'\n'}Browse courses and start learning!
+              Bạn chưa mua khóa học nào.{"\n"}Hãy khám phá và bắt đầu học ngay!
             </Text>
           }
         />
@@ -84,30 +86,40 @@ export default function MyCoursesScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#ffeaa7', padding: 16, paddingTop: 48 },
-  header: { fontSize: 24, fontWeight: '800', color: '#e17055', marginBottom: 4 },
+  container: {
+    flex: 1,
+    backgroundColor: "#ffeaa7",
+    padding: 16,
+    paddingTop: 48,
+  },
+  header: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#e17055",
+    marginBottom: 4,
+  },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 18,
     padding: 16,
     marginTop: 12,
   },
   cardContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
-  title: { fontSize: 16, fontWeight: '700', color: '#2d3436' },
-  meta: { fontSize: 13, color: '#00cec9', marginTop: 4 },
+  title: { fontSize: 16, fontWeight: "700", color: "#2d3436" },
+  meta: { fontSize: 13, color: "#00cec9", marginTop: 4 },
   reviewBtn: {
-    backgroundColor: '#74b9ff',
+    backgroundColor: "#74b9ff",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  reviewBtnText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  reviewBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
   empty: {
-    textAlign: 'center',
-    color: '#636e72',
+    textAlign: "center",
+    color: "#636e72",
     marginTop: 40,
     fontSize: 15,
     lineHeight: 22,

@@ -51,29 +51,33 @@ function InstructorTabs() {
       <Tab.Screen
         name="InstructorHome"
         component={DashboardScreen}
-        options={{ title: "Dashboard" }}
+        options={{ title: "Bảng điều khiển" }}
       />
       <Tab.Screen
         name="Upload"
         component={UploadCourseScreen}
-        options={{ title: "Upload" }}
+        options={{ title: "Tải lên" }}
       />
       <Tab.Screen
         name="MyCourses"
         component={ManageCoursesScreen}
-        options={{ title: "Courses" }}
+        options={{ title: "Khóa học" }}
       />
       <Tab.Screen
         name="Reports"
         component={OrderReportsScreen}
-        options={{ title: "Reports" }}
+        options={{ title: "Báo cáo" }}
       />
       <Tab.Screen
         name="Revenue"
         component={RevenueScreen}
-        options={{ title: "Revenue" }}
+        options={{ title: "Doanh thu" }}
       />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: "Tài khoản" }}
+      />
     </Tab.Navigator>
   );
 }

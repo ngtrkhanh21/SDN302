@@ -9,6 +9,8 @@ import {
     View,
 } from "react-native";
 import orderService from "../../services/order-service";
+import { getOrderAmount, setOrderAmount } from "../../utils/order-amount-cache";
+import { formatVnd, getLineItemPricing } from "../../utils/pricing";
 
 export default function OrderHistoryScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -19,10 +21,23 @@ export default function OrderHistoryScreen({ navigation }) {
     try {
       const data = await orderService.getMyOrders();
       const list = data?.data || data || [];
-      setOrders(Array.isArray(list) ? list : []);
+      const normalizedList = Array.isArray(list) ? list : [];
+      normalizedList.forEach((orderItem) => {
+        const orderId = orderItem?._id || orderItem?.id;
+        const apiTotal = Number(
+          orderItem?.total ??
+            orderItem?.totalPrice ??
+            orderItem?.finalPrice ??
+            0,
+        );
+        if (orderId && apiTotal > 0) {
+          setOrderAmount(orderId, apiTotal);
+        }
+      });
+      setOrders(normalizedList);
     } catch (error) {
       console.warn("Failed to load orders", error);
-      Alert.alert("Error", "Cannot load orders.");
+      Alert.alert("Lỗi", "Không thể tải danh sách đơn hàng.");
     } finally {
       setIsLoading(false);
     }
@@ -42,15 +57,24 @@ export default function OrderHistoryScreen({ navigation }) {
     return "#fdcb6e";
   };
 
-  const handlePayNow = (orderId) => {
-    navigation.navigate("Payment", { orderId });
+  const handlePayNow = (orderId, fallbackTotal) => {
+    navigation.navigate("Payment", { orderId, fallbackTotal });
   };
 
   const renderItem = ({ item }) => {
     const orderId = item._id || item.id;
     const status = item.status || "pending";
     const items = item.items || item.courses || [];
-    const total = item.total ?? items.reduce((s, i) => s + (i.price || 0), 0);
+    const apiTotal = Number(
+      item.total ?? item.totalPrice ?? item.finalPrice ?? 0,
+    );
+    const computedTotal = items.reduce((sum, lineItem) => {
+      const { finalPrice } = getLineItemPricing(lineItem);
+      return sum + finalPrice;
+    }, 0);
+    const cachedTotal = getOrderAmount(orderId);
+    const total =
+      apiTotal > 0 ? apiTotal : computedTotal > 0 ? computedTotal : cachedTotal;
     const createdAt = item.createdAt
       ? new Date(item.createdAt).toLocaleDateString("vi-VN")
       : "";
@@ -59,14 +83,12 @@ export default function OrderHistoryScreen({ navigation }) {
     return (
       <View style={styles.card}>
         <View style={styles.cardRow}>
-          <Text style={styles.orderId}>Order #{String(orderId).slice(-6)}</Text>
+          <Text style={styles.orderId}>Đơn #{String(orderId).slice(-6)}</Text>
           <Text style={[styles.status, { color: getStatusColor(status) }]}>
             {status.toUpperCase()}
           </Text>
         </View>
-        <Text style={styles.total}>
-          {Number(total).toLocaleString("vi-VN")} VND
-        </Text>
+        <Text style={styles.total}>{formatVnd(total)}</Text>
         {createdAt ? <Text style={styles.date}>{createdAt}</Text> : null}
 
         <View style={styles.cardActions}>
@@ -84,7 +106,7 @@ export default function OrderHistoryScreen({ navigation }) {
                 }
               }}
             >
-              <Text style={styles.feedbackText}>Give Feedback</Text>
+              <Text style={styles.feedbackText}>Đánh giá</Text>
             </TouchableOpacity>
           )}
 
@@ -92,9 +114,9 @@ export default function OrderHistoryScreen({ navigation }) {
           {isPending && (
             <TouchableOpacity
               style={styles.payNowBtn}
-              onPress={() => handlePayNow(orderId)}
+              onPress={() => handlePayNow(orderId, total)}
             >
-              <Text style={styles.payNowText}>Pay Now</Text>
+              <Text style={styles.payNowText}>Thanh toán ngay</Text>
             </TouchableOpacity>
           )}
         </View>
@@ -104,8 +126,8 @@ export default function OrderHistoryScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your art story</Text>
-      <Text style={styles.subtitle}>Orders you have placed</Text>
+      <Text style={styles.title}>Lịch sử đơn hàng</Text>
+      <Text style={styles.subtitle}>Các đơn hàng bạn đã tạo</Text>
 
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 24 }} color="#d35400" />
@@ -115,7 +137,9 @@ export default function OrderHistoryScreen({ navigation }) {
           keyExtractor={(item) => String(item._id || item.id)}
           renderItem={renderItem}
           contentContainerStyle={{ paddingVertical: 16 }}
-          ListEmptyComponent={<Text style={styles.empty}>No orders yet.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.empty}>Chưa có đơn hàng nào.</Text>
+          }
         />
       )}
     </View>

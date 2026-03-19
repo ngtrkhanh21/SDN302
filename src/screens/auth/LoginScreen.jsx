@@ -1,20 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-} from 'react-native';
-import useAuthStore from '../../store/auth-store';
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import useAuthStore from "../../store/auth-store";
 
 export default function LoginScreen({ navigation }) {
   const { login, initializeAuth } = useAuthStore();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Missing information', 'Please enter email and password.');
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập email và mật khẩu.");
       return;
     }
 
@@ -33,29 +33,29 @@ export default function LoginScreen({ navigation }) {
     } catch (error) {
       const message =
         error.response?.data?.message ||
-        'Login failed. Please check your credentials.';
-      Alert.alert('Login failed', message);
+        "Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.";
+      Alert.alert("Đăng nhập thất bại", message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleGoToRegister = () => {
-    navigation.navigate('Register');
+    navigation.navigate("Register");
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.header}>
         <Text style={styles.title}>ArtFun</Text>
-        <Text style={styles.subtitle}>Colorful learning for kids</Text>
+        <Text style={styles.subtitle}>Học tập sắc màu cho trẻ nhỏ</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Welcome back!</Text>
+        <Text style={styles.cardTitle}>Chào mừng quay lại!</Text>
 
         <TextInput
           placeholder="Email"
@@ -68,7 +68,7 @@ export default function LoginScreen({ navigation }) {
         />
 
         <TextInput
-          placeholder="Password"
+          placeholder="Mật khẩu"
           placeholderTextColor="#999"
           value={password}
           onChangeText={setPassword}
@@ -82,14 +82,14 @@ export default function LoginScreen({ navigation }) {
           disabled={isSubmitting}
         >
           <Text style={styles.buttonText}>
-            {isSubmitting ? 'Signing in...' : 'Let’s paint!'}
+            {isSubmitting ? "Đang đăng nhập..." : "Bắt đầu thôi!"}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleGoToRegister}>
           <Text style={styles.linkText}>
-            New here?{' '}
-            <Text style={styles.linkHighlight}>Create a magic account</Text>
+            Bạn mới ở đây?{" "}
+            <Text style={styles.linkHighlight}>Tạo tài khoản ngay</Text>
           </Text>
         </TouchableOpacity>
       </View>
@@ -102,27 +102,27 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingVertical: 32,
-    backgroundColor: '#ffeaa7',
-    justifyContent: 'center',
+    backgroundColor: "#ffeaa7",
+    justifyContent: "center",
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
   },
   title: {
     fontSize: 40,
-    fontWeight: '800',
-    color: '#e17055',
+    fontWeight: "800",
+    color: "#e17055",
   },
   subtitle: {
     fontSize: 16,
-    color: '#2d3436',
+    color: "#2d3436",
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 24,
     padding: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
@@ -130,12 +130,12 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: 16,
-    color: '#0984e3',
+    color: "#0984e3",
   },
   input: {
-    backgroundColor: '#f1f2f6',
+    backgroundColor: "#f1f2f6",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -143,28 +143,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   button: {
-    backgroundColor: '#ff7675',
+    backgroundColor: "#ff7675",
     borderRadius: 20,
     paddingVertical: 14,
-    alignItems: 'center',
+    alignItems: "center",
     marginVertical: 12,
   },
   buttonDisabled: {
     opacity: 0.7,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   linkText: {
-    textAlign: 'center',
-    color: '#636e72',
+    textAlign: "center",
+    color: "#636e72",
     marginTop: 4,
   },
   linkHighlight: {
-    color: '#0984e3',
-    fontWeight: '600',
+    color: "#0984e3",
+    fontWeight: "600",
   },
 });
-

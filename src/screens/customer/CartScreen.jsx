@@ -10,6 +10,8 @@ import {
 } from "react-native";
 import cartService from "../../services/cart-service";
 import orderService from "../../services/order-service";
+import { setOrderAmount } from "../../utils/order-amount-cache";
+import { formatVnd, getLineItemPricing } from "../../utils/pricing";
 
 export default function CartScreen({ navigation }) {
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +41,7 @@ export default function CartScreen({ navigation }) {
       );
     } catch (error) {
       console.warn("Failed to load cart", error);
-      Alert.alert("Error", "Cannot load cart.");
+      Alert.alert("Lỗi", "Không thể tải giỏ hàng.");
     } finally {
       setIsLoading(false);
     }
@@ -53,7 +55,7 @@ export default function CartScreen({ navigation }) {
   const handleRemove = async (item) => {
     const cartItemId = item._id || item.id || item.cartItemId || item.item_id;
     if (!cartItemId) {
-      Alert.alert("Error", "Cannot determine cart item id.");
+      Alert.alert("Lỗi", "Không xác định được mã mục trong giỏ hàng.");
       return;
     }
 
@@ -62,15 +64,15 @@ export default function CartScreen({ navigation }) {
       loadCart();
     } catch (error) {
       console.warn("Failed to remove cart item", error);
-      Alert.alert("Error", "Cannot remove item from cart.");
+      Alert.alert("Lỗi", "Không thể xóa mục khỏi giỏ hàng.");
     }
   };
 
   const handleClear = async () => {
-    Alert.alert("Clear cart", "Remove all items from cart?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert("Xóa giỏ hàng", "Xóa tất cả khóa học khỏi giỏ hàng?", [
+      { text: "Hủy", style: "cancel" },
       {
-        text: "Clear",
+        text: "Xóa",
         style: "destructive",
         onPress: async () => {
           try {
@@ -78,7 +80,7 @@ export default function CartScreen({ navigation }) {
             loadCart();
           } catch (error) {
             console.warn("Failed to clear cart", error);
-            Alert.alert("Error", "Cannot clear cart.");
+            Alert.alert("Lỗi", "Không thể xóa giỏ hàng.");
           }
         },
       },
@@ -87,7 +89,7 @@ export default function CartScreen({ navigation }) {
 
   const handleCheckout = async () => {
     if (!cart.length) {
-      Alert.alert("Empty cart", "Please add some courses first.");
+      Alert.alert("Giỏ hàng trống", "Vui lòng thêm khóa học trước.");
       return;
     }
 
@@ -96,7 +98,7 @@ export default function CartScreen({ navigation }) {
       .filter(Boolean);
 
     if (!selectedCartItemIds.length) {
-      Alert.alert("Error", "Cannot determine cart item ids for checkout.");
+      Alert.alert("Lỗi", "Không xác định được mã mục để thanh toán.");
       return;
     }
     try {
@@ -108,20 +110,32 @@ export default function CartScreen({ navigation }) {
       await loadCart();
 
       if (orderId) {
-        Alert.alert("Order created", "Proceed to payment?", [
+        const checkoutTotal = Number(total) || 0;
+        if (checkoutTotal > 0) {
+          setOrderAmount(orderId, checkoutTotal);
+        }
+
+        Alert.alert("Đã tạo đơn hàng", "Chuyển đến thanh toán?", [
           {
-            text: "Yes",
-            onPress: () => navigation.navigate("Payment", { orderId }),
+            text: "Có",
+            onPress: () =>
+              navigation.navigate("Payment", {
+                orderId,
+                fallbackTotal: checkoutTotal,
+              }),
           },
-          { text: "Later", style: "cancel" },
+          { text: "Để sau", style: "cancel" },
         ]);
       } else {
-        Alert.alert("Order created", "Check your orders for payment.");
+        Alert.alert(
+          "Đã tạo đơn hàng",
+          "Vui lòng kiểm tra đơn hàng để thanh toán.",
+        );
         loadCart();
       }
     } catch (error) {
       console.warn("Failed to create order", error);
-      Alert.alert("Error", "Cannot create order from cart.");
+      Alert.alert("Lỗi", "Không thể tạo đơn hàng từ giỏ hàng.");
     }
   };
 
@@ -129,8 +143,9 @@ export default function CartScreen({ navigation }) {
     const course =
       item.course || item.course_id || item.courseId || item.courseInfo || item;
     const itemTitle =
-      course?.name || item.course_name || item.name || item.title || "Course";
-    const itemPrice = item.price ?? course?.price ?? 0;
+      course?.name || item.course_name || item.name || item.title || "Khóa học";
+    const { originalPrice, discountPercent, finalPrice } =
+      getLineItemPricing(item);
     const canRemove = !!(
       item._id ||
       item.id ||
@@ -142,11 +157,21 @@ export default function CartScreen({ navigation }) {
       <View style={styles.itemRow}>
         <View style={{ flex: 1 }}>
           <Text style={styles.itemTitle}>{itemTitle}</Text>
-          <Text style={styles.itemPrice}>
-            {itemPrice
-              ? `${Number(itemPrice).toLocaleString("vi-VN")} VND`
-              : "Free"}
-          </Text>
+          {originalPrice <= 0 ? (
+            <Text style={styles.itemPrice}>Miễn phí</Text>
+          ) : discountPercent > 0 ? (
+            <View style={styles.priceWrap}>
+              <View style={styles.priceTopRow}>
+                <Text style={styles.itemOldPrice}>
+                  {formatVnd(originalPrice)}
+                </Text>
+                <Text style={styles.itemDiscount}>-{discountPercent}%</Text>
+              </View>
+              <Text style={styles.itemFinalPrice}>{formatVnd(finalPrice)}</Text>
+            </View>
+          ) : (
+            <Text style={styles.itemPrice}>{formatVnd(finalPrice)}</Text>
+          )}
         </View>
         {canRemove ? (
           <TouchableOpacity
@@ -166,23 +191,19 @@ export default function CartScreen({ navigation }) {
     cartMeta.finalPrice ??
     cartMeta.subtotal;
 
+  const computedTotal = cart.reduce((sum, item) => {
+    const { finalPrice } = getLineItemPricing(item);
+    return sum + finalPrice;
+  }, 0);
+
   const total =
-    typeof totalFromApi === "number"
-      ? totalFromApi
-      : cart.reduce((sum, item) => {
-          const course =
-            item.course ||
-            item.course_id ||
-            item.courseId ||
-            item.courseInfo ||
-            item;
-          const itemPrice = item.price ?? course?.price ?? 0;
-          return sum + (Number(itemPrice) || 0);
-        }, 0);
+    computedTotal > 0 || cart.length > 0
+      ? computedTotal
+      : Number(totalFromApi || 0);
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Your art basket</Text>
+      <Text style={styles.title}>Giỏ khóa học của bạn</Text>
 
       {isLoading ? (
         <ActivityIndicator style={{ marginTop: 24 }} color="#00cec9" />
@@ -196,22 +217,22 @@ export default function CartScreen({ navigation }) {
             renderItem={renderItem}
             contentContainerStyle={{ paddingVertical: 16 }}
             ListEmptyComponent={
-              <Text style={styles.empty}>Your basket is empty.</Text>
+              <Text style={styles.empty}>Giỏ hàng của bạn đang trống.</Text>
             }
           />
 
           {cart.length > 0 && (
             <View style={styles.footer}>
-              <Text style={styles.totalText}>Total: {total} VND</Text>
+              <Text style={styles.totalText}>Tổng: {formatVnd(total)}</Text>
               <View style={styles.footerButtons}>
                 <TouchableOpacity style={styles.clearBtn} onPress={handleClear}>
-                  <Text style={styles.clearText}>Clear</Text>
+                  <Text style={styles.clearText}>Xóa</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.checkoutBtn}
                   onPress={handleCheckout}
                 >
-                  <Text style={styles.checkoutText}>Checkout</Text>
+                  <Text style={styles.checkoutText}>Thanh toán</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -250,6 +271,30 @@ const styles = StyleSheet.create({
   itemPrice: {
     fontSize: 14,
     color: "#636e72",
+  },
+  priceWrap: {
+    marginTop: 3,
+    gap: 2,
+  },
+  priceTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  itemOldPrice: {
+    fontSize: 12,
+    color: "#95a5a6",
+    textDecorationLine: "line-through",
+  },
+  itemDiscount: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#d63031",
+  },
+  itemFinalPrice: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#d63031",
   },
   removeButton: {
     width: 28,

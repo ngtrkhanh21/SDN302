@@ -15,8 +15,8 @@ import instructorService from "../../services/instructor-service";
 import userService from "../../services/user-service";
 
 const ROLE_LABELS = {
-  0: "Admin",
-  1: "Staff",
+  0: "Quản trị viên",
+  1: "Nhân viên",
   2: "Học viên",
   3: "Giảng viên",
 };
@@ -51,13 +51,13 @@ function extractEntity(payload) {
 
 function formatRole(role) {
   if (typeof role === "number") {
-    return ROLE_LABELS[role] || `Role ${role}`;
+    return ROLE_LABELS[role] || `Vai trò ${role}`;
   }
 
   if (typeof role === "string") {
     const normalized = role.toLowerCase();
-    if (normalized === "admin") return "Admin";
-    if (normalized === "staff") return "Staff";
+    if (normalized === "admin") return "Quản trị viên";
+    if (normalized === "staff") return "Nhân viên";
     if (normalized === "instructor" || normalized === "teacher")
       return "Giảng viên";
     if (normalized === "customer" || normalized === "student")

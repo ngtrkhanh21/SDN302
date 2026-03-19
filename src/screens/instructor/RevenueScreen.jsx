@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
-import instructorService from '../../services/instructor-service';
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
+import instructorService from "../../services/instructor-service";
 
 export default function RevenueScreen() {
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,7 @@ export default function RevenueScreen() {
       const list = res?.data || res || [];
       setSalesSummary(Array.isArray(list) ? list : []);
     } catch (error) {
-      console.warn('Failed to load sales summary', error);
+      console.warn("Failed to load sales summary", error);
     } finally {
       setIsLoading(false);
       setRefreshing(false);
@@ -42,7 +42,7 @@ export default function RevenueScreen() {
   );
 
   const renderItem = ({ item }) => {
-    const title = item.courseName || `Course ID: ${item.courseId}`;
+    const title = item.courseName || `Mã khóa học: ${item.courseId}`;
     const revenue = item.totalRevenue || 0;
     const sold = item.totalSold || 0;
 
@@ -56,13 +56,13 @@ export default function RevenueScreen() {
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
-            <Text style={styles.statLabel}>Copies Sold</Text>
+            <Text style={styles.statLabel}>Lượt bán</Text>
             <Text style={styles.statValue}>{sold}</Text>
           </View>
           <View style={[styles.statBox, styles.statBoxRight]}>
-            <Text style={styles.statLabel}>Total Revenue</Text>
+            <Text style={styles.statLabel}>Doanh thu</Text>
             <Text style={styles.statRevenue}>
-              {Number(revenue).toLocaleString('vi-VN')} đ
+              {Number(revenue).toLocaleString("vi-VN")} đ
             </Text>
           </View>
         </View>
@@ -72,21 +72,25 @@ export default function RevenueScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Revenue</Text>
-      <Text style={styles.subtitle}>Watch your art business blossom</Text>
+      <Text style={styles.title}>Doanh thu</Text>
+      <Text style={styles.subtitle}>Theo dõi kết quả kinh doanh của bạn</Text>
 
       <View style={styles.totalBox}>
-        <Text style={styles.totalLabel}>Total Earnings</Text>
+        <Text style={styles.totalLabel}>Tổng thu nhập</Text>
         <Text style={styles.totalValue}>
-          {Number(totalGlobalRevenue).toLocaleString('vi-VN')} VND
+          {Number(totalGlobalRevenue).toLocaleString("vi-VN")} VND
         </Text>
       </View>
 
       {isLoading ? (
-        <ActivityIndicator color="#00b894" size="large" style={{ marginTop: 24 }} />
+        <ActivityIndicator
+          color="#00b894"
+          size="large"
+          style={{ marginTop: 24 }}
+        />
       ) : (
         <View style={styles.listContainer}>
-          <Text style={styles.listTitle}>Breakdown by Course</Text>
+          <Text style={styles.listTitle}>Chi tiết theo khóa học</Text>
           <FlatList
             data={salesSummary}
             keyExtractor={(item, index) => String(item.courseId || index)}
@@ -96,7 +100,7 @@ export default function RevenueScreen() {
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
             }
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No revenue data yet.</Text>
+              <Text style={styles.emptyText}>Chưa có dữ liệu doanh thu.</Text>
             }
           />
         </View>
@@ -108,106 +112,106 @@ export default function RevenueScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#55efc4',
+    backgroundColor: "#55efc4",
     paddingTop: 56,
   },
   title: {
     fontSize: 26,
-    fontWeight: '800',
-    color: '#00b894',
+    fontWeight: "800",
+    color: "#00b894",
     marginBottom: 4,
     paddingHorizontal: 24,
   },
   subtitle: {
     fontSize: 15,
-    color: '#2d3436',
+    color: "#2d3436",
     marginBottom: 24,
     paddingHorizontal: 24,
   },
   totalBox: {
-    backgroundColor: '#00b894',
+    backgroundColor: "#00b894",
     marginHorizontal: 24,
     borderRadius: 20,
     padding: 24,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 4,
   },
   totalLabel: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
     opacity: 0.9,
     marginBottom: 8,
   },
   totalValue: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 32,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   listContainer: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     padding: 24,
   },
   listTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2d3436',
+    fontWeight: "700",
+    color: "#2d3436",
     marginBottom: 16,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: "#eee",
   },
   cardHeader: {
     marginBottom: 16,
   },
   courseTitle: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#2d3436',
+    fontWeight: "700",
+    color: "#2d3436",
     lineHeight: 22,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     borderTopWidth: 1,
-    borderTopColor: '#f1f2f6',
+    borderTopColor: "#f1f2f6",
     paddingTop: 16,
   },
   statBox: {
     flex: 1,
   },
   statBoxRight: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
   },
   statLabel: {
     fontSize: 13,
-    color: '#636e72',
+    color: "#636e72",
     marginBottom: 4,
   },
   statValue: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#0984e3',
+    fontWeight: "700",
+    color: "#0984e3",
   },
   statRevenue: {
     fontSize: 18,
-    fontWeight: '800',
-    color: '#00b894',
+    fontWeight: "800",
+    color: "#00b894",
   },
   emptyText: {
-    textAlign: 'center',
-    color: '#b2bec3',
+    textAlign: "center",
+    color: "#b2bec3",
     marginTop: 32,
     fontSize: 15,
   },

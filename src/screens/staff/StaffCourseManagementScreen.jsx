@@ -64,7 +64,7 @@ export default function StaffCourseManagementScreen() {
       setCourses(extractList(data));
     } catch (error) {
       console.warn("Failed to load courses:", error);
-      Alert.alert("Error", "Cannot load courses.");
+      Alert.alert("Lỗi", "Không thể tải danh sách khóa học.");
     }
   }, [extractList]);
 
@@ -84,7 +84,7 @@ export default function StaffCourseManagementScreen() {
       setCoursesMap(courseMap);
     } catch (error) {
       console.warn("Failed to load sessions:", error);
-      Alert.alert("Error", "Cannot load sessions.");
+      Alert.alert("Lỗi", "Không thể tải danh sách phiên học.");
     }
   }, [extractList]);
 
@@ -115,7 +115,7 @@ export default function StaffCourseManagementScreen() {
       setCoursesMap(courseMap);
     } catch (error) {
       console.warn("Failed to load lessons:", error);
-      Alert.alert("Error", "Cannot load lessons.");
+      Alert.alert("Lỗi", "Không thể tải danh sách bài học.");
     }
   }, [extractList]);
 

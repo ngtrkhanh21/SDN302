@@ -13,14 +13,14 @@ import userService from "../../services/user-service";
 import useAuthStore from "../../store/auth-store";
 
 function getRoleLabel(role) {
-  if (role === 0) return "ADMIN";
-  if (role === 1) return "STAFF";
-  if (role === 3) return "INSTRUCTOR";
-  if (role === 2) return "CUSTOMER";
-  if (role === ROLES.ADMIN) return "ADMIN";
-  if (role === ROLES.STAFF) return "STAFF";
-  if (role === ROLES.INSTRUCTOR) return "INSTRUCTOR";
-  return "CUSTOMER";
+  if (role === 0) return "Quản trị viên";
+  if (role === 1) return "Nhân viên";
+  if (role === 3) return "Giảng viên";
+  if (role === 2) return "Học viên";
+  if (role === ROLES.ADMIN) return "Quản trị viên";
+  if (role === ROLES.STAFF) return "Nhân viên";
+  if (role === ROLES.INSTRUCTOR) return "Giảng viên";
+  return "Học viên";
 }
 
 function extractEntity(payload) {
@@ -71,12 +71,12 @@ export default function ProfileScreen({ navigation }) {
   const role = profileUser?.role ?? user?.role;
   const roleLabel = getRoleLabel(role);
   const isCustomerRole =
-    role === 2 || role === ROLES.CUSTOMER || roleLabel === "CUSTOMER";
+    role === 2 || role === ROLES.CUSTOMER || roleLabel === "Học viên";
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.title}>My colorful profile</Text>
+        <Text style={styles.title}>Hồ sơ của tôi</Text>
 
         {isLoading ? (
           <View style={styles.loadingWrap}>
@@ -85,13 +85,15 @@ export default function ProfileScreen({ navigation }) {
           </View>
         ) : null}
 
-        <Text style={styles.label}>Name</Text>
-        <Text style={styles.value}>{profileUser?.name || "Little artist"}</Text>
+        <Text style={styles.label}>Họ và tên</Text>
+        <Text style={styles.value}>{profileUser?.name || "Học viên"}</Text>
 
         <Text style={styles.label}>Email</Text>
-        <Text style={styles.value}>{profileUser?.email || "Unknown"}</Text>
+        <Text style={styles.value}>
+          {profileUser?.email || "Không xác định"}
+        </Text>
 
-        <Text style={styles.label}>Role</Text>
+        <Text style={styles.label}>Vai trò</Text>
         <Text style={styles.value}>{roleLabel}</Text>
 
         {navigation && (
@@ -100,7 +102,7 @@ export default function ProfileScreen({ navigation }) {
               style={styles.editButton}
               onPress={() => navigation.navigate("ProfileEdit")}
             >
-              <Text style={styles.editText}>✏️ Edit Profile</Text>
+              <Text style={styles.editText}>✏️ Chỉnh sửa hồ sơ</Text>
             </TouchableOpacity>
 
             {isCustomerRole ? (
@@ -108,7 +110,7 @@ export default function ProfileScreen({ navigation }) {
                 style={styles.historyButton}
                 onPress={() => navigation.navigate("PaymentHistory")}
               >
-                <Text style={styles.historyText}>💳 Payment History</Text>
+                <Text style={styles.historyText}>💳 Lịch sử thanh toán</Text>
               </TouchableOpacity>
             ) : null}
           </>
@@ -117,17 +119,17 @@ export default function ProfileScreen({ navigation }) {
         <TouchableOpacity
           style={styles.logoutButton}
           onPress={() => {
-            Alert.alert("Sign out", "Do you want to sign out?", [
-              { text: "Cancel", style: "cancel" },
+            Alert.alert("Đăng xuất", "Bạn có muốn đăng xuất không?", [
+              { text: "Hủy", style: "cancel" },
               {
-                text: "Sign out",
+                text: "Đăng xuất",
                 style: "destructive",
                 onPress: logout,
               },
             ]);
           }}
         >
-          <Text style={styles.logoutText}>Sign out</Text>
+          <Text style={styles.logoutText}>Đăng xuất</Text>
         </TouchableOpacity>
       </View>
     </View>

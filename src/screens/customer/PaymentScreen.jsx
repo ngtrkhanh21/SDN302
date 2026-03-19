@@ -1,26 +1,127 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import orderService from "../../services/order-service";
 import paymentService from "../../services/payment-service";
 import vnpayService from "../../services/vnpay-service";
+import { getOrderAmount, setOrderAmount } from "../../utils/order-amount-cache";
+import { formatVnd, getLineItemPricing } from "../../utils/pricing";
 
 export default function PaymentScreen({ route, navigation }) {
-  const { orderId } = route.params;
+  const { orderId, fallbackTotal: routeFallbackTotal = 0 } = route.params;
+  const initialCachedTotal = getOrderAmount(orderId);
+  const initialFallbackTotal = Math.max(
+    Number(routeFallbackTotal) || 0,
+    initialCachedTotal,
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [vnpayUrl, setVnpayUrl] = useState("");
   const [isWebviewVisible, setIsWebviewVisible] = useState(false);
+  const [amountSummary, setAmountSummary] = useState({
+    originalTotal: initialFallbackTotal,
+    finalTotal: initialFallbackTotal,
+    discountTotal: 0,
+  });
   const hasHandledReturnRef = useRef(false);
   const hasShownBlockedLinkAlertRef = useRef(false);
   const paymentMetaRef = useRef({ orderId: orderId || "", paymentId: "" });
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadOrderAmount = async () => {
+      if (!orderId) {
+        return;
+      }
+
+      try {
+        const response = await orderService.getOrderDetail(orderId);
+        const order =
+          response?.data && !Array.isArray(response.data)
+            ? response.data
+            : response;
+        const items = order?.items || order?.courses || [];
+
+        if (!Array.isArray(items) || items.length === 0) {
+          const fallbackFromOrder = Number(
+            order?.total ?? order?.totalPrice ?? order?.finalPrice ?? 0,
+          );
+          const fallbackFinal = Math.max(
+            fallbackFromOrder,
+            Number(routeFallbackTotal) || 0,
+            getOrderAmount(orderId),
+          );
+
+          if (fallbackFinal > 0) {
+            setOrderAmount(orderId, fallbackFinal);
+          }
+
+          if (mounted) {
+            setAmountSummary({
+              originalTotal: fallbackFinal,
+              finalTotal: fallbackFinal,
+              discountTotal: 0,
+            });
+          }
+          return;
+        }
+
+        const totals = items.reduce(
+          (acc, lineItem) => {
+            const { originalPrice, finalPrice } = getLineItemPricing(lineItem);
+            return {
+              originalTotal: acc.originalTotal + originalPrice,
+              finalTotal: acc.finalTotal + finalPrice,
+            };
+          },
+          { originalTotal: 0, finalTotal: 0 },
+        );
+
+        const fallbackFromOrder = Number(
+          order?.total ?? order?.totalPrice ?? order?.finalPrice ?? 0,
+        );
+        const fallbackFinal = Math.max(
+          fallbackFromOrder,
+          Number(routeFallbackTotal) || 0,
+          getOrderAmount(orderId),
+        );
+
+        const finalTotal =
+          totals.finalTotal > 0 ? totals.finalTotal : fallbackFinal;
+        const originalTotal =
+          totals.originalTotal > 0 ? totals.originalTotal : finalTotal;
+        const discountTotal = Math.max(originalTotal - finalTotal, 0);
+
+        if (finalTotal > 0) {
+          setOrderAmount(orderId, finalTotal);
+        }
+
+        if (mounted) {
+          setAmountSummary({
+            originalTotal,
+            finalTotal,
+            discountTotal,
+          });
+        }
+      } catch (error) {
+        console.warn("Failed to load order detail for payment", error);
+      }
+    };
+
+    loadOrderAmount();
+
+    return () => {
+      mounted = false;
+    };
+  }, [orderId, routeFallbackTotal]);
 
   const parseQueryParamsFromUrl = (url) => {
     if (!url || !url.includes("?")) {
@@ -242,7 +343,7 @@ export default function PaymentScreen({ route, navigation }) {
         paymentData?._id || paymentData?.id || paymentData?.paymentId;
       if (!paymentId) {
         Alert.alert(
-          "Error",
+          "Lỗi",
           "Không lấy được paymentId từ createPaymentFromOrder.",
         );
         return;
@@ -278,15 +379,15 @@ export default function PaymentScreen({ route, navigation }) {
         setVnpayUrl(normalizedUrl);
         setIsWebviewVisible(true);
       } else {
-        Alert.alert("Info", "Không nhận được URL thanh toán VNPay.");
+        Alert.alert("Thông báo", "Không nhận được URL thanh toán VNPay.");
       }
     } catch (error) {
       console.warn("Failed to create payment", error);
       const msg =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
-        "Cannot create payment.";
-      Alert.alert("Error", msg);
+        "Không thể tạo thanh toán.";
+      Alert.alert("Lỗi", msg);
     } finally {
       setIsLoading(false);
     }
@@ -298,10 +399,26 @@ export default function PaymentScreen({ route, navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
+        <Text style={styles.backButtonText}>← Quay lại</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>Payment</Text>
-      <Text style={styles.subtitle}>Order ID: {orderId}</Text>
+      <Text style={styles.title}>Thanh toán</Text>
+      <Text style={styles.subtitle}>Mã đơn hàng: {orderId}</Text>
+
+      <View style={styles.amountCard}>
+        {amountSummary.discountTotal > 0 ? (
+          <Text style={styles.amountOriginal}>
+            Tạm tính: {formatVnd(amountSummary.originalTotal)}
+          </Text>
+        ) : null}
+        {amountSummary.discountTotal > 0 ? (
+          <Text style={styles.amountDiscount}>
+            Giảm giá: -{formatVnd(amountSummary.discountTotal)}
+          </Text>
+        ) : null}
+        <Text style={styles.amountFinal}>
+          Thanh toán: {formatVnd(amountSummary.finalTotal)}
+        </Text>
+      </View>
 
       <TouchableOpacity
         style={[styles.button, isLoading && styles.buttonDisabled]}
@@ -311,7 +428,7 @@ export default function PaymentScreen({ route, navigation }) {
         {isLoading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Pay with VNPay</Text>
+          <Text style={styles.buttonText}>Thanh toán với VNPay</Text>
         )}
       </TouchableOpacity>
 
@@ -319,7 +436,7 @@ export default function PaymentScreen({ route, navigation }) {
         style={styles.backBtn}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backText}>Back to cart</Text>
+        <Text style={styles.backText}>Quay lại giỏ hàng</Text>
       </TouchableOpacity>
 
       <Modal
@@ -328,7 +445,7 @@ export default function PaymentScreen({ route, navigation }) {
         onRequestClose={handleCancelPayment}
       >
         <View style={styles.webviewHeader}>
-          <Text style={styles.webviewTitle}>VNPay Checkout</Text>
+          <Text style={styles.webviewTitle}>Thanh toán VNPay</Text>
           <TouchableOpacity
             onPress={handleCancelPayment}
             style={styles.webviewCloseBtn}
@@ -420,7 +537,30 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 14,
     color: "#2d3436",
-    marginBottom: 24,
+    marginBottom: 12,
+  },
+  amountCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  amountOriginal: {
+    fontSize: 13,
+    color: "#95a5a6",
+    textDecorationLine: "line-through",
+  },
+  amountDiscount: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#d63031",
+    marginTop: 4,
+  },
+  amountFinal: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#d63031",
+    marginTop: 6,
   },
   button: {
     backgroundColor: "#e17055",

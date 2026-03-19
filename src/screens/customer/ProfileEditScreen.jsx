@@ -99,7 +99,7 @@ export default function ProfileEditScreen({ navigation }) {
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Validation", "Vui lòng nhập họ tên.");
+      Alert.alert("Thiếu thông tin", "Vui lòng nhập họ tên.");
       return;
     }
 
@@ -109,7 +109,7 @@ export default function ProfileEditScreen({ navigation }) {
       isoDate = parseDate(dob.trim());
       if (!isoDate) {
         Alert.alert(
-          "Validation",
+          "Thiếu thông tin",
           "Ngày sinh không đúng định dạng.\nVui lòng nhập D/M/YYYY hoặc DD/MM/YYYY (ví dụ: 2/3/2001 hoặc 15/01/2000)",
         );
         return;
@@ -159,11 +159,11 @@ export default function ProfileEditScreen({ navigation }) {
         style={styles.backButton}
         onPress={() => navigation.goBack()}
       >
-        <Text style={styles.backButtonText}>← Back</Text>
+        <Text style={styles.backButtonText}>← Quay lại</Text>
       </TouchableOpacity>
 
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Edit Profile</Text>
+        <Text style={styles.title}>Chỉnh sửa hồ sơ</Text>
         <Text style={styles.subtitle}>Cập nhật thông tin của bạn</Text>
 
         <Text style={styles.label}>Họ và tên *</Text>
